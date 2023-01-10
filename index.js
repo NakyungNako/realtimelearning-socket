@@ -28,6 +28,23 @@ io.on("connection", (socket) => {
   socket.on("send_data", (data) => {
     socket.broadcast.to(data.room).emit("receive_data", data);
   });
+
+  socket.on("send_refresh", (data) => {
+    socket.broadcast.to(data.room).emit("receive_refresh", data);
+  });
+
+  socket.on("new message", (newMessageRecieved) => {
+    var chat = newMessageRecieved.chat.chat;
+    if (!chat.users) return console.log("chat.users not defined");
+
+    chat.users.forEach((user) => {
+      if (user._id == newMessageRecieved.chat.sender._id) return;
+
+      socket
+        .in(newMessageRecieved.room)
+        .emit("message recieved", newMessageRecieved);
+    });
+  });
 });
 
 server.listen(process.env.SOCKET_PORT || 5001, () => {
