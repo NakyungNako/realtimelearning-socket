@@ -29,9 +29,16 @@ io.on("connection", (socket) => {
     socket.broadcast.to(data.room).emit("receive_data", data);
   });
 
+  socket.on("send_question", (data) => {
+    socket.broadcast.to(data.room).emit("receive_question", data);
+  });
+
   socket.on("send_refresh", (data) => {
     socket.broadcast.to(data.room).emit("receive_refresh", data);
   });
+
+  socket.on("typing", (room) => socket.in(room).emit("typing"));
+  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
   socket.on("new message", (newMessageRecieved) => {
     var chat = newMessageRecieved.chat.chat;
@@ -44,6 +51,11 @@ io.on("connection", (socket) => {
         .in(newMessageRecieved.room)
         .emit("message recieved", newMessageRecieved);
     });
+  });
+
+  socket.off("join_room", () => {
+    console.log("USER DISCONNECTED");
+    socket.leave(data);
   });
 });
 
